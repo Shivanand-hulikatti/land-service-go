@@ -39,41 +39,67 @@ func (s *LandEnrichmentService) EnrichLandInfoRequest(ctx context.Context, landR
 	auditDetails := s.util.GetAuditDetails(auditUserUUID(landRequest.RequestInfo), true)
 	landRequest.LandInfo.AuditDetails = auditDetails
 
-	if !isUpdate {
-		landRequest.LandInfo.ID = uuid.New().String()
-		if err := s.boundary.GetAreaType(ctx, landRequest, s.cfg.Egov.Location.HierarchyTypeCode); err != nil {
-			return err
-		}
+	if err := s.enrichForCreate(ctx, landRequest, isUpdate); err != nil {
+		return err
 	}
 
-	land := landRequest.LandInfo
-	if land.Institution != nil {
-		if land.Institution.ID == "" {
-			land.Institution.ID = uuid.New().String()
-		}
-		if land.Institution.TenantID == "" {
-			land.Institution.TenantID = land.TenantID
-		}
-	}
+	enrichLandInfoChildren(landRequest.LandInfo, auditDetails)
+	return nil
+}
 
+func (s *LandEnrichmentService) enrichForCreate(ctx context.Context, landRequest *domain.LandInfoRequest, isUpdate bool) error {
+	if isUpdate {
+		return nil
+	}
+	landRequest.LandInfo.ID = uuid.New().String()
+	return s.boundary.GetAreaType(ctx, landRequest, s.cfg.Egov.Location.HierarchyTypeCode)
+}
+
+func enrichLandInfoChildren(land *domain.LandInfo, auditDetails *domain.AuditDetails) {
+	enrichInstitution(land)
+	applyLandDefaults(land)
+	enrichAddress(land, auditDetails)
+	enrichUnits(land, auditDetails)
+	enrichDocuments(land, auditDetails)
+	assignOwnerIDsAndAudit(land, auditDetails)
+}
+
+func enrichInstitution(land *domain.LandInfo) {
+	if land.Institution == nil {
+		return
+	}
+	if land.Institution.ID == "" {
+		land.Institution.ID = uuid.New().String()
+	}
+	if land.Institution.TenantID == "" {
+		land.Institution.TenantID = land.TenantID
+	}
+}
+
+func applyLandDefaults(land *domain.LandInfo) {
 	if land.Channel == "" {
 		land.Channel = domain.ChannelSystem
 	}
 	if land.Source == "" {
 		land.Source = domain.SourceMunicipalRecords
 	}
+}
 
-	if land.Address != nil {
-		if land.Address.ID == "" {
-			land.Address.ID = uuid.New().String()
-		}
-		land.Address.TenantID = land.TenantID
-		land.Address.AuditDetails = auditDetails
-		if land.Address.GeoLocation != nil && land.Address.GeoLocation.ID == "" {
-			land.Address.GeoLocation.ID = uuid.New().String()
-		}
+func enrichAddress(land *domain.LandInfo, auditDetails *domain.AuditDetails) {
+	if land.Address == nil {
+		return
 	}
+	if land.Address.ID == "" {
+		land.Address.ID = uuid.New().String()
+	}
+	land.Address.TenantID = land.TenantID
+	land.Address.AuditDetails = auditDetails
+	if land.Address.GeoLocation != nil && land.Address.GeoLocation.ID == "" {
+		land.Address.GeoLocation.ID = uuid.New().String()
+	}
+}
 
+func enrichUnits(land *domain.LandInfo, auditDetails *domain.AuditDetails) {
 	for i := range land.Unit {
 		if land.Unit[i].ID == "" {
 			land.Unit[i].ID = uuid.New().String()
@@ -81,21 +107,24 @@ func (s *LandEnrichmentService) EnrichLandInfoRequest(ctx context.Context, landR
 		land.Unit[i].TenantID = land.TenantID
 		land.Unit[i].AuditDetails = auditDetails
 	}
+}
 
+func enrichDocuments(land *domain.LandInfo, auditDetails *domain.AuditDetails) {
 	for i := range land.Documents {
 		if land.Documents[i].ID == "" {
 			land.Documents[i].ID = uuid.New().String()
 		}
 		land.Documents[i].AuditDetails = auditDetails
 	}
+}
 
+func assignOwnerIDsAndAudit(land *domain.LandInfo, auditDetails *domain.AuditDetails) {
 	for i := range land.Owners {
 		if land.Owners[i].OwnerID == "" {
 			land.Owners[i].OwnerID = uuid.New().String()
 		}
 		land.Owners[i].AuditDetails = auditDetails
 	}
-	return nil
 }
 
 func (s *LandEnrichmentService) EnrichLandInfoSearch(

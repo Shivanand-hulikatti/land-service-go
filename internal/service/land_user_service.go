@@ -28,41 +28,65 @@ func (s *LandUserService) ManageUser(ctx context.Context, landRequest *domain.La
 	requestInfo := landRequest.RequestInfo
 
 	for i := range landInfo.Owners {
-		owner := &landInfo.Owners[i]
-		if owner.MobileNumber == "" {
-			return NewCustomException(InvalidOwnerError, "MobileNo is mandatory for ownerInfo")
-		}
-
-		if owner.TenantID == "" {
-			owner.TenantID = stateTenantID(landInfo.TenantID)
-		}
-
-		userDetailResponse, err := s.userExists(ctx, owner, requestInfo)
-		if err != nil {
+		if err := s.syncOwnerUser(ctx, &landInfo.Owners[i], landInfo.TenantID, requestInfo); err != nil {
 			return err
-		}
-
-		if userDetailResponse == nil || len(userDetailResponse.User) == 0 ||
-			!owner.CompareWithExistingUser(userDetailResponse.User[0]) {
-			role := citizenRole()
-			s.addUserDefaultFields(owner.TenantID, role, owner)
-			owner.UserName = uuid.New().String()
-			owner.OwnerType = Citizen
-			userDetailResponse, err = s.userCall(ctx, s.cfg.Egov.User.CreateURL(), domain.CreateUserRequest{
-				RequestInfo: requestInfo,
-				User:        owner,
-			}, userDOBCreateLayout)
-			if err != nil {
-				return err
-			}
-			logrus.Debugf("owner created --> %s", userDetailResponse.User[0].UUID)
-		}
-
-		if userDetailResponse != nil {
-			setOwnerFields(owner, userDetailResponse)
 		}
 	}
 	return nil
+}
+
+func (s *LandUserService) syncOwnerUser(
+	ctx context.Context,
+	owner *domain.OwnerInfo,
+	landTenantID string,
+	requestInfo *domain.RequestInfo,
+) error {
+	if owner.MobileNumber == "" {
+		return NewCustomException(InvalidOwnerError, "MobileNo is mandatory for ownerInfo")
+	}
+	if owner.TenantID == "" {
+		owner.TenantID = stateTenantID(landTenantID)
+	}
+
+	userDetailResponse, err := s.userExists(ctx, owner, requestInfo)
+	if err != nil {
+		return err
+	}
+
+	userDetailResponse, err = s.ensureOwnerUser(ctx, owner, requestInfo, userDetailResponse)
+	if err != nil {
+		return err
+	}
+	if userDetailResponse != nil {
+		setOwnerFields(owner, userDetailResponse)
+	}
+	return nil
+}
+
+func (s *LandUserService) ensureOwnerUser(
+	ctx context.Context,
+	owner *domain.OwnerInfo,
+	requestInfo *domain.RequestInfo,
+	existing *domain.UserDetailResponse,
+) (*domain.UserDetailResponse, error) {
+	if existing != nil && len(existing.User) > 0 && owner.CompareWithExistingUser(existing.User[0]) {
+		return existing, nil
+	}
+
+	role := citizenRole()
+	s.addUserDefaultFields(owner.TenantID, role, owner)
+	owner.UserName = uuid.New().String()
+	owner.OwnerType = Citizen
+
+	created, err := s.userCall(ctx, s.cfg.Egov.User.CreateURL(), domain.CreateUserRequest{
+		RequestInfo: requestInfo,
+		User:        owner,
+	}, userDOBCreateLayout)
+	if err != nil {
+		return nil, err
+	}
+	logrus.Debugf("owner created --> %s", created.User[0].UUID)
+	return created, nil
 }
 
 func (s *LandUserService) GetUser(ctx context.Context, criteria domain.LandSearchCriteria, requestInfo *domain.RequestInfo) (*domain.UserDetailResponse, error) {

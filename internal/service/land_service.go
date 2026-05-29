@@ -83,11 +83,7 @@ func (s *LandService) Update(ctx context.Context, landRequest *domain.LandInfoRe
 		return nil, NewCustomException(UpdateError, "Id is mandatory to update ")
 	}
 
-	for i := range landInfo.Owners {
-		if landInfo.Owners[i].OwnerType == "" {
-			landInfo.Owners[i].OwnerType = "NONE"
-		}
-	}
+	defaultOwnerTypes(landInfo.Owners)
 
 	if err := s.validator.ValidateLandInfo(landRequest, mdmsData); err != nil {
 		return nil, err
@@ -105,16 +101,29 @@ func (s *LandService) Update(ctx context.Context, landRequest *domain.LandInfoRe
 		return nil, err
 	}
 
-	if len(landInfo.Owners) > 1 {
-		active := make([]domain.OwnerInfo, 0, len(landInfo.Owners))
-		for _, owner := range landInfo.Owners {
-			if owner.Status != nil && *owner.Status {
-				active = append(active, owner)
-			}
-		}
-		landInfo.Owners = active
-	}
+	landInfo.Owners = filterActiveOwners(landInfo.Owners)
 	return landInfo, nil
+}
+
+func defaultOwnerTypes(owners []domain.OwnerInfo) {
+	for i := range owners {
+		if owners[i].OwnerType == "" {
+			owners[i].OwnerType = "NONE"
+		}
+	}
+}
+
+func filterActiveOwners(owners []domain.OwnerInfo) []domain.OwnerInfo {
+	if len(owners) <= 1 {
+		return owners
+	}
+	active := make([]domain.OwnerInfo, 0, len(owners))
+	for _, owner := range owners {
+		if owner.Status != nil && *owner.Status {
+			active = append(active, owner)
+		}
+	}
+	return active
 }
 
 func (s *LandService) Search(

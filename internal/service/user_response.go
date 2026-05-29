@@ -24,19 +24,25 @@ func normalizeUserResponseDates(resp map[string]any, dobFormat string) {
 		if !ok {
 			continue
 		}
-		if s, ok := m["createdDate"].(string); ok && s != "" {
-			m["createdDate"] = dateToLong(s, userTimestampLayout)
-		}
-		if s, ok := m["lastModifiedDate"].(string); ok && s != "" {
-			m["lastModifiedDate"] = dateToLong(s, userTimestampLayout)
-		}
-		if s, ok := m["dob"].(string); ok && s != "" && dobFormat != "" {
-			m["dob"] = dateToLong(s, dobFormat)
-		}
-		if s, ok := m["pwdExpiryDate"].(string); ok && s != "" {
-			m["pwdExpiryDate"] = dateToLong(s, userTimestampLayout)
-		}
+		normalizeUserMapDates(m, dobFormat)
 	}
+}
+
+func normalizeUserMapDates(m map[string]any, dobFormat string) {
+	replaceDateField(m, "createdDate", userTimestampLayout)
+	replaceDateField(m, "lastModifiedDate", userTimestampLayout)
+	if dobFormat != "" {
+		replaceDateField(m, "dob", dobFormat)
+	}
+	replaceDateField(m, "pwdExpiryDate", userTimestampLayout)
+}
+
+func replaceDateField(m map[string]any, field, layout string) {
+	s, ok := m[field].(string)
+	if !ok || s == "" {
+		return
+	}
+	m[field] = dateToLong(s, layout)
 }
 
 func dateToLong(value, layout string) *int64 {
