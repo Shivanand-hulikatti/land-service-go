@@ -1,0 +1,13 @@
+{
+  "RequestInfo": {
+    "apiId": "Rainmaker",
+    "msgId": "20170310130900|en_IN"
+  },
+  "LandInfo": {
+    "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "tenantId": "pb.amritsar",
+    "ownershipCategory": "INDIVIDUAL",
+    "source": "MUNICIPAL_RECORDS",
+    "channel": "SYSTEM"
+  }
+}

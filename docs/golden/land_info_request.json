@@ -1,0 +1,37 @@
+{
+  "RequestInfo": {
+    "apiId": "Rainmaker",
+    "ver": ".01",
+    "ts": 1700000000000,
+    "action": "_create",
+    "did": "1",
+    "key": "",
+    "msgId": "20170310130900|en_IN",
+    "authToken": "test-token",
+    "userInfo": {
+      "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "userName": "EMP001",
+      "type": "EMPLOYEE",
+      "tenantId": "pb.amritsar"
+    }
+  },
+  "LandInfo": {
+    "tenantId": "pb.amritsar",
+    "ownershipCategory": "INDIVIDUAL",
+    "address": {
+      "doorNo": "12",
+      "city": "Amritsar",
+      "locality": {
+        "code": "SUN01"
+      }
+    },
+    "owners": [
+      {
+        "name": "Test Owner",
+        "mobileNumber": "9999999999",
+        "isPrimaryOwner": true,
+        "active": true
+      }
+    ]
+  }
+}

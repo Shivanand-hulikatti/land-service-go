@@ -1,0 +1,16 @@
+{
+  "ResponseInfo": {
+    "apiId": "Rainmaker",
+    "ver": ".01",
+    "ts": 1700000000000,
+    "resMsgId": "uief87324",
+    "msgId": "20170310130900|en_IN",
+    "status": "failed"
+  },
+  "Errors": [
+    {
+      "code": "INVALID TENANT",
+      "message": " Application cannot be create at StateLevel"
+    }
+  ]
+}

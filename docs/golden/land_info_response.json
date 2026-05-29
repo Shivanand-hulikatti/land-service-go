@@ -1,0 +1,26 @@
+{
+  "ResponseInfo": {
+    "apiId": "Rainmaker",
+    "ver": ".01",
+    "ts": 1700000000000,
+    "resMsgId": "uief87324",
+    "msgId": "20170310130900|en_IN",
+    "status": "successful"
+  },
+  "LandInfo": [
+    {
+      "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "tenantId": "pb.amritsar",
+      "status": "ACTIVE",
+      "ownershipCategory": "INDIVIDUAL",
+      "source": "MUNICIPAL_RECORDS",
+      "channel": "SYSTEM",
+      "auditDetails": {
+        "createdBy": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "lastModifiedBy": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "createdTime": 1700000000000,
+        "lastModifiedTime": 1700000000000
+      }
+    }
+  ]
+}

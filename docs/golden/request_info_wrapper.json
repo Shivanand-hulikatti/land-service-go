@@ -1,0 +1,14 @@
+{
+  "RequestInfo": {
+    "apiId": "Rainmaker",
+    "ver": ".01",
+    "ts": 1700000000000,
+    "msgId": "20170310130900|en_IN",
+    "authToken": "test-token",
+    "userInfo": {
+      "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "type": "CITIZEN",
+      "tenantId": "pb"
+    }
+  }
+}
