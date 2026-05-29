@@ -1,0 +1,121 @@
+{
+  "info": {
+    "name": "land-services-go",
+    "description": "DIGIT land-services Go API — create, update, search, health, and error cases.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8199/land-services"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Land Create — success (needs MDMS, user, location, Kafka)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"20170310130900|en_IN\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"pb.amritsar\"\n    }\n  },\n  \"LandInfo\": {\n    \"tenantId\": \"pb.amritsar\",\n    \"ownershipCategory\": \"INDIVIDUAL\",\n    \"address\": {\n      \"doorNo\": \"12\",\n      \"city\": \"Amritsar\",\n      \"locality\": { \"code\": \"SUN01\" }\n    },\n    \"owners\": [\n      {\n        \"name\": \"Test Owner\",\n        \"mobileNumber\": \"9999999999\",\n        \"isPrimaryOwner\": true,\n        \"active\": true\n      }\n    ]\n  }\n}"
+        },
+        "url": "{{baseUrl}}/v1/land/_create"
+      }
+    },
+    {
+      "name": "Land Create — state-level tenant (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"RequestInfo\": { \"msgId\": \"err-1\", \"userInfo\": { \"type\": \"EMPLOYEE\" } },\n  \"LandInfo\": { \"tenantId\": \"pb\", \"ownershipCategory\": \"INDIVIDUAL\" }\n}"
+        },
+        "url": "{{baseUrl}}/v1/land/_create"
+      }
+    },
+    {
+      "name": "Land Create — invalid JSON (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{not-json" },
+        "url": "{{baseUrl}}/v1/land/_create"
+      }
+    },
+    {
+      "name": "Land Update — missing id (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"RequestInfo\": { \"msgId\": \"err-2\" },\n  \"LandInfo\": { \"tenantId\": \"pb.amritsar\" }\n}"
+        },
+        "url": "{{baseUrl}}/v1/land/_update"
+      }
+    },
+    {
+      "name": "Land Search — by tenantId",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-1\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\", \"tenantId\": \"pb.amritsar\" }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/land/_search?tenantId=pb.amritsar&limit=10&offset=0",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "land", "_search"],
+          "query": [
+            { "key": "tenantId", "value": "pb.amritsar" },
+            { "key": "limit", "value": "10" },
+            { "key": "offset", "value": "0" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Land Search — employee empty criteria (400)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-err\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\" }\n  }\n}"
+        },
+        "url": "{{baseUrl}}/v1/land/_search"
+      }
+    },
+    {
+      "name": "Land Search — by mobileNumber",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-mobile\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\" }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/land/_search?tenantId=pb.amritsar&mobileNumber=9999999999",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "land", "_search"],
+          "query": [
+            { "key": "tenantId", "value": "pb.amritsar" },
+            { "key": "mobileNumber", "value": "9999999999" }
+          ]
+        }
+      }
+    }
+  ]
+}
