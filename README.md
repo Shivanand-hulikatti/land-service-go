@@ -235,12 +235,19 @@ newman run docs/postman/land-services.postman_collection.json \
 
 Edge-case tracking: [docs/EDGE-CASE-MATRIX.md](docs/EDGE-CASE-MATRIX.md)
 
-### SonarQube
+### SonarQube (Go only)
+
+Analysis is scoped to **`cmd/`, `internal/`, `pkg/`** (`**/*.go` only). The Java `land-services/` tree is never included if you run the scanner from this directory.
 
 ```bash
-make test-cover
-sonar-scanner   # uses sonar-project.properties
+cd land-services-go   # not the parent digit-go-services repo root
+export SONAR_TOKEN=your_token   # never commit this
+make sonar            # test-cover + sonar-scanner
 ```
+
+Dashboard: https://sonarcloud.io/dashboard?id=land-services-go
+
+If **SonarLint** in the IDE still shows Java issues, bind analysis to this folder only (open `land-services-go` as the workspace root, or disable SonarLint for `land-services/`).
 
 ## Project layout
 

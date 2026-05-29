@@ -15,15 +15,15 @@ type RequestInfo struct {
 
 // ContractUser mirrors fields used from egov-common-contract User / UserInfo in land-services.
 type ContractUser struct {
-	ID           *int64       `json:"id,omitempty"`
-	UUID         string       `json:"uuid,omitempty"`
-	UserName     string       `json:"userName,omitempty"`
-	Name         string       `json:"name,omitempty"`
-	Type         string       `json:"type,omitempty"`
-	MobileNumber string       `json:"mobileNumber,omitempty"`
-	EmailID      string       `json:"emailId,omitempty"`
-	TenantID     string       `json:"tenantId,omitempty"`
-	Roles        []Role       `json:"roles,omitempty"`
-	PrimaryRole  []Role       `json:"primaryrole,omitempty"`
+	ID              *int64       `json:"id,omitempty"`
+	UUID            string       `json:"uuid,omitempty"`
+	UserName        string       `json:"userName,omitempty"`
+	Name            string       `json:"name,omitempty"`
+	Type            string       `json:"type,omitempty"`
+	MobileNumber    string       `json:"mobileNumber,omitempty"`
+	EmailID         string       `json:"emailId,omitempty"`
+	TenantID        string       `json:"tenantId,omitempty"`
+	Roles           []Role       `json:"roles,omitempty"`
+	PrimaryRole     []Role       `json:"primaryrole,omitempty"`
 	AdditionalRoles []TenantRole `json:"additionalroles,omitempty"`
 }

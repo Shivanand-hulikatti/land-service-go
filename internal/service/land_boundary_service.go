@@ -38,7 +38,9 @@ func (s *LandBoundaryService) GetAreaType(ctx context.Context, request *domain.L
 		return err
 	}
 
-	resp, err := s.client.PostJSONMap(ctx, endpoint, request.RequestInfo)
+	resp, err := s.client.PostJSONMap(ctx, endpoint, domain.RequestInfoWrapper{
+		RequestInfo: request.RequestInfo,
+	})
 	if err != nil {
 		return err
 	}

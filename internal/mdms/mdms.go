@@ -94,6 +94,10 @@ func extractCodes(value any) []string {
 	case []any:
 		codes := make([]string, 0, len(v))
 		for _, item := range v {
+			if code, ok := item.(string); ok {
+				codes = append(codes, code)
+				continue
+			}
 			if m, ok := item.(map[string]any); ok {
 				if code, ok := m["code"].(string); ok {
 					codes = append(codes, code)

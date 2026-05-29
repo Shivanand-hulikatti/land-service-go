@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/Shivanand-hulikatti/digit-go-services/land-services-go/internal/domain"
@@ -31,6 +32,8 @@ func normalizeUserResponseDates(resp map[string]any, dobFormat string) {
 func normalizeUserMapDates(m map[string]any, dobFormat string) {
 	replaceDateField(m, "createdDate", userTimestampLayout)
 	replaceDateField(m, "lastModifiedDate", userTimestampLayout)
+	replaceStringField(m, "createdBy")
+	replaceStringField(m, "lastModifiedBy")
 	if dobFormat != "" {
 		replaceDateField(m, "dob", dobFormat)
 	}
@@ -52,6 +55,17 @@ func dateToLong(value, layout string) *int64 {
 	}
 	ms := t.UnixMilli()
 	return &ms
+}
+
+func replaceStringField(m map[string]any, field string) {
+	switch v := m[field].(type) {
+	case float64:
+		m[field] = fmt.Sprintf("%.0f", v)
+	case int:
+		m[field] = fmt.Sprintf("%d", v)
+	case int64:
+		m[field] = fmt.Sprintf("%d", v)
+	}
 }
 
 func decodeUserDetailResponse(resp map[string]any, dobFormat string) (*domain.UserDetailResponse, error) {

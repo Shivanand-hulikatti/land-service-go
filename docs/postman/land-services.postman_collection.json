@@ -58,7 +58,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"20170310130900|en_IN\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"userName\": \"EMP001\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"{{tenantId}}\"\n    }\n  },\n  \"LandInfo\": {\n    \"tenantId\": \"{{tenantId}}\",\n    \"ownershipCategory\": \"INDIVIDUAL\",\n    \"address\": {\n      \"doorNo\": \"12\",\n      \"city\": \"Amritsar\",\n      \"locality\": { \"code\": \"SUN01\" }\n    },\n    \"owners\": [\n      {\n        \"name\": \"Test Owner\",\n        \"mobileNumber\": \"9999999999\",\n        \"isPrimaryOwner\": true,\n        \"active\": true\n      }\n    ]\n  }\n}"
+              "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"20170310130900|en_IN\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"userName\": \"EMP001\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"{{tenantId}}\"\n    }\n  },\n  \"LandInfo\": {\n    \"tenantId\": \"{{tenantId}}\",\n    \"ownershipCategory\": \"INDIVIDUAL.SINGLEOWNER\",\n    \"address\": {\n      \"doorNo\": \"12\",\n      \"city\": \"Amritsar\",\n      \"locality\": { \"code\": \"SUN04\" }\n    },\n    \"owners\": [\n      {\n        \"name\": \"Test Owner\",\n        \"mobileNumber\": \"9999999999\",\n        \"isPrimaryOwner\": true,\n        \"active\": true\n      }\n    ]\n  }\n}"
             },
             "url": "{{baseUrl}}/v1/land/_create",
             "description": "Needs MDMS, egov-user, egov-location, Kafka + persister. Publishes to `save-landinfo`."
@@ -70,7 +70,7 @@
               "code": 200,
               "_postman_previewlanguage": "json",
               "header": [{ "key": "Content-Type", "value": "application/json" }],
-              "body": "{\n  \"ResponseInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"20170310130900|en_IN\",\n    \"status\": \"successful\"\n  },\n  \"LandInfo\": [\n    {\n      \"id\": \"<uuid-assigned>\",\n      \"tenantId\": \"pb.amritsar\",\n      \"status\": \"ACTIVE\",\n      \"ownershipCategory\": \"INDIVIDUAL\",\n      \"auditDetails\": {\n        \"createdBy\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n        \"createdTime\": 1700000000000,\n        \"lastModifiedTime\": 1700000000000\n      }\n    }\n  ]\n}"
+              "body": "{\n  \"ResponseInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"20170310130900|en_IN\",\n    \"status\": \"successful\"\n  },\n  \"LandInfo\": [\n    {\n      \"id\": \"<uuid-assigned>\",\n      \"tenantId\": \"pb.amritsar\",\n      \"status\": \"ACTIVE\",\n      \"ownershipCategory\": \"INDIVIDUAL.SINGLEOWNER\",\n      \"auditDetails\": {\n        \"createdBy\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n        \"createdTime\": 1700000000000,\n        \"lastModifiedTime\": 1700000000000\n      }\n    }\n  ]\n}"
             }
           ]
         },
@@ -164,7 +164,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"update-1\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"{{tenantId}}\"\n    }\n  },\n  \"LandInfo\": {\n    \"id\": \"{{landId}}\",\n    \"tenantId\": \"{{tenantId}}\",\n    \"ownershipCategory\": \"INDIVIDUAL\",\n    \"address\": {\n      \"doorNo\": \"12A\",\n      \"city\": \"Amritsar\",\n      \"locality\": { \"code\": \"SUN01\" }\n    },\n    \"owners\": [\n      {\n        \"name\": \"Test Owner\",\n        \"mobileNumber\": \"9999999999\",\n        \"isPrimaryOwner\": true,\n        \"active\": true\n      }\n    ]\n  }\n}"
+              "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"update-1\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"{{tenantId}}\"\n    }\n  },\n  \"LandInfo\": {\n    \"id\": \"{{landId}}\",\n    \"tenantId\": \"{{tenantId}}\",\n    \"ownershipCategory\": \"INDIVIDUAL.SINGLEOWNER\",\n    \"address\": {\n      \"doorNo\": \"12A\",\n      \"city\": \"Amritsar\",\n      \"locality\": { \"code\": \"SUN04\" }\n    },\n    \"owners\": [\n      {\n        \"name\": \"Test Owner\",\n        \"mobileNumber\": \"9999999999\",\n        \"isPrimaryOwner\": true,\n        \"active\": true\n      }\n    ]\n  }\n}"
             },
             "url": "{{baseUrl}}/v1/land/_update",
             "description": "Set `landId` to an existing record. Publishes to `update-landinfo`."

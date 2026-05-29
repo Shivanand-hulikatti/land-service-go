@@ -2,12 +2,12 @@ package domain
 
 // ResponseInfo mirrors org.egov.common.contract.response.ResponseInfo.
 type ResponseInfo struct {
-	APIID     string `json:"apiId,omitempty"`
-	Ver       string `json:"ver,omitempty"`
-	Ts        *int64 `json:"ts,omitempty"`
-	ResMsgID  string `json:"resMsgId,omitempty"`
-	MsgID     string `json:"msgId,omitempty"`
-	Status    string `json:"status,omitempty"`
+	APIID    string `json:"apiId,omitempty"`
+	Ver      string `json:"ver,omitempty"`
+	Ts       *int64 `json:"ts,omitempty"`
+	ResMsgID string `json:"resMsgId,omitempty"`
+	MsgID    string `json:"msgId,omitempty"`
+	Status   string `json:"status,omitempty"`
 }
 
 // NewResponseInfoFromRequest ports org.egov.land.util.ResponseInfoFactory.

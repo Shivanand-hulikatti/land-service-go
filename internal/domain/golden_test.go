@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -39,8 +40,16 @@ func assertJSONRoundTrip(t *testing.T, input []byte, dest any) {
 	if err := json.Unmarshal(out, again); err != nil {
 		t.Fatalf("re-unmarshal: %v", err)
 	}
-	if !reflect.DeepEqual(dest, again) {
-		t.Fatalf("round-trip changed value\ngot:  %+v\nwant: %+v", again, dest)
+	// Compare at the JSON level rather than struct level: a nil json.RawMessage
+	// marshals to `null` (required so persister JSON paths always resolve), and
+	// re-unmarshaling `null` yields the literal bytes "null" instead of nil. The
+	// serialized output is what the persister consumes, so assert idempotency there.
+	out2, err := json.Marshal(again)
+	if err != nil {
+		t.Fatalf("re-marshal: %v", err)
+	}
+	if !bytes.Equal(out, out2) {
+		t.Fatalf("round-trip changed serialized value\ngot:  %s\nwant: %s", out2, out)
 	}
 }
 

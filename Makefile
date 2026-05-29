@@ -1,4 +1,4 @@
-.PHONY: test test-unit test-integration test-cover newman build run
+.PHONY: test test-unit test-integration test-cover sonar newman build run
 
 BASE_URL ?= http://localhost:8199/land-services
 
@@ -16,6 +16,11 @@ test-integration:
 test-cover:
 	go test ./... -coverprofile=coverage.out
 	go tool cover -func=coverage.out
+
+# Run from this directory only — scans Go under cmd/, internal/, pkg/ (not Java land-services).
+sonar: test-cover
+	@test -n "$$SONAR_TOKEN" || (echo "export SONAR_TOKEN=... first" && exit 1)
+	sonar-scanner -Dsonar.host.url=https://sonarcloud.io
 
 newman:
 	newman run docs/postman/land-services.postman_collection.json \
