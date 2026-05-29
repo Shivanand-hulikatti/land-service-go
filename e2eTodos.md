@@ -63,7 +63,7 @@
 
 ### Initialize the Repository
 - [x] Create a new GitHub repo named `<service-name>-go` — https://github.com/Shivanand-hulikatti/land-service-go
-- [ ] Create and checkout a `dev` branch — this is your base, never push directly to `main` — **only `main` exists today**
+- [x] Create and checkout a `dev` branch — this is your base, never push directly to `main` — replayed 22 `[landserv]` commits on `dev` (2026-05-26)
 - [x] Initialize Go modules: `go mod init github.com/<org>/<service-name>-go` — module path in `go.mod`
 
 ### Create the Folder Structure
@@ -109,7 +109,7 @@ Create every folder exactly as specified. No deviations.
 
 ### First Commit
 - [x] Commit: `[<prefix>] chore: initialized Go project with folder structure and go.mod`
-- [ ] Push to `dev` branch — pushed to `main` only
+- [x] Push to `dev` branch — `git push -u origin dev` after replay
 
 ---
 
