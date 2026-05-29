@@ -1,121 +1,369 @@
 {
   "info": {
     "name": "land-services-go",
-    "description": "DIGIT land-services Go API — create, update, search, health, and error cases.",
+    "description": "DIGIT land-services Go API (Java parity).\n\n## Required headers (all POST)\n| Header | Value | Required |\n|--------|--------|----------|\n| `Content-Type` | `application/json` | Yes |\n| `Accept` | `application/json` | Yes |\n\n## Auth (local DIGIT)\n- No `Authorization` header required for local stack.\n- Optional: set collection variable `authToken` and include `\"authToken\": \"{{authToken}}\"` inside `RequestInfo` (gateway parity).\n\n## Variables\n- `baseUrl` — default `http://localhost:8199/land-services`\n\n## Response shapes\n- Success: HTTP **200**, `ResponseInfo.status` = `successful`, `LandInfo` array (create/update/search).\n- Business error: HTTP **400**, `ResponseInfo.status` = `failed`, `Errors[]` with `code` + `message`.\n- Health: HTTP **200** (UP) or **503** (DEGRADED when DB/Kafka down).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8199/land-services"
-    }
+    { "key": "baseUrl", "value": "http://localhost:8199/land-services" },
+    { "key": "authToken", "value": "test-token" },
+    { "key": "tenantId", "value": "pb.amritsar" },
+    { "key": "landId", "value": "f47ac10b-58cc-4372-a567-0e02b2c3d479" }
   ],
   "item": [
     {
       "name": "Health",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{baseUrl}}/health"
-      }
-    },
-    {
-      "name": "Land Create — success (needs MDMS, user, location, Kafka)",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"20170310130900|en_IN\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"pb.amritsar\"\n    }\n  },\n  \"LandInfo\": {\n    \"tenantId\": \"pb.amritsar\",\n    \"ownershipCategory\": \"INDIVIDUAL\",\n    \"address\": {\n      \"doorNo\": \"12\",\n      \"city\": \"Amritsar\",\n      \"locality\": { \"code\": \"SUN01\" }\n    },\n    \"owners\": [\n      {\n        \"name\": \"Test Owner\",\n        \"mobileNumber\": \"9999999999\",\n        \"isPrimaryOwner\": true,\n        \"active\": true\n      }\n    ]\n  }\n}"
-        },
-        "url": "{{baseUrl}}/v1/land/_create"
-      }
-    },
-    {
-      "name": "Land Create — state-level tenant (400)",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"RequestInfo\": { \"msgId\": \"err-1\", \"userInfo\": { \"type\": \"EMPLOYEE\" } },\n  \"LandInfo\": { \"tenantId\": \"pb\", \"ownershipCategory\": \"INDIVIDUAL\" }\n}"
-        },
-        "url": "{{baseUrl}}/v1/land/_create"
-      }
-    },
-    {
-      "name": "Land Create — invalid JSON (400)",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{not-json" },
-        "url": "{{baseUrl}}/v1/land/_create"
-      }
-    },
-    {
-      "name": "Land Update — missing id (400)",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"RequestInfo\": { \"msgId\": \"err-2\" },\n  \"LandInfo\": { \"tenantId\": \"pb.amritsar\" }\n}"
-        },
-        "url": "{{baseUrl}}/v1/land/_update"
-      }
-    },
-    {
-      "name": "Land Search — by tenantId",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-1\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\", \"tenantId\": \"pb.amritsar\" }\n  }\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/v1/land/_search?tenantId=pb.amritsar&limit=10&offset=0",
-          "host": ["{{baseUrl}}"],
-          "path": ["v1", "land", "_search"],
-          "query": [
-            { "key": "tenantId", "value": "pb.amritsar" },
-            { "key": "limit", "value": "10" },
-            { "key": "offset", "value": "0" }
+      "item": [
+        {
+          "name": "GET health — UP",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json", "description": "Required" }
+            ],
+            "url": "{{baseUrl}}/health",
+            "description": "Liveness check. Expect 200 when process is up."
+          },
+          "response": [
+            {
+              "name": "200 — UP (DB + Kafka connected)",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status\": \"UP\",\n  \"service\": \"land-services-go\",\n  \"components\": {\n    \"database\": \"UP\",\n    \"kafka\": \"UP\"\n  }\n}"
+            },
+            {
+              "name": "503 — DEGRADED (DB or Kafka down)",
+              "status": "Service Unavailable",
+              "code": 503,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status\": \"DEGRADED\",\n  \"service\": \"land-services-go\",\n  \"components\": {\n    \"database\": \"DOWN\",\n    \"kafka\": \"DOWN\"\n  }\n}"
+            }
           ]
         }
-      }
+      ]
     },
     {
-      "name": "Land Search — employee empty criteria (400)",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-err\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\" }\n  }\n}"
+      "name": "v1/land/_create",
+      "item": [
+        {
+          "name": "POST _create — success",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "description": "Required" },
+              { "key": "Accept", "value": "application/json", "description": "Required" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"20170310130900|en_IN\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"userName\": \"EMP001\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"{{tenantId}}\"\n    }\n  },\n  \"LandInfo\": {\n    \"tenantId\": \"{{tenantId}}\",\n    \"ownershipCategory\": \"INDIVIDUAL\",\n    \"address\": {\n      \"doorNo\": \"12\",\n      \"city\": \"Amritsar\",\n      \"locality\": { \"code\": \"SUN01\" }\n    },\n    \"owners\": [\n      {\n        \"name\": \"Test Owner\",\n        \"mobileNumber\": \"9999999999\",\n        \"isPrimaryOwner\": true,\n        \"active\": true\n      }\n    ]\n  }\n}"
+            },
+            "url": "{{baseUrl}}/v1/land/_create",
+            "description": "Needs MDMS, egov-user, egov-location, Kafka + persister. Publishes to `save-landinfo`."
+          },
+          "response": [
+            {
+              "name": "200 — successful (schema)",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"20170310130900|en_IN\",\n    \"status\": \"successful\"\n  },\n  \"LandInfo\": [\n    {\n      \"id\": \"<uuid-assigned>\",\n      \"tenantId\": \"pb.amritsar\",\n      \"status\": \"ACTIVE\",\n      \"ownershipCategory\": \"INDIVIDUAL\",\n      \"auditDetails\": {\n        \"createdBy\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n        \"createdTime\": 1700000000000,\n        \"lastModifiedTime\": 1700000000000\n      }\n    }\n  ]\n}"
+            }
+          ]
         },
-        "url": "{{baseUrl}}/v1/land/_search"
-      }
-    },
-    {
-      "name": "Land Search — by mobileNumber",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-mobile\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\" }\n  }\n}"
+        {
+          "name": "POST _create — state-level tenant (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"err-state-tenant\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\", \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\" }\n  },\n  \"LandInfo\": {\n    \"tenantId\": \"pb\",\n    \"ownershipCategory\": \"INDIVIDUAL\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/v1/land/_create",
+            "description": "Error case: tenantId without ULB suffix."
+          },
+          "response": [
+            {
+              "name": "400 — INVALID TENANT",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": {\n    \"msgId\": \"err-state-tenant\",\n    \"status\": \"failed\"\n  },\n  \"Errors\": [\n    {\n      \"code\": \"INVALID TENANT\",\n      \"message\": \" Application cannot be create at StateLevel\"\n    }\n  ]\n}"
+            }
+          ]
         },
-        "url": {
-          "raw": "{{baseUrl}}/v1/land/_search?tenantId=pb.amritsar&mobileNumber=9999999999",
-          "host": ["{{baseUrl}}"],
-          "path": ["v1", "land", "_search"],
-          "query": [
-            { "key": "tenantId", "value": "pb.amritsar" },
-            { "key": "mobileNumber", "value": "9999999999" }
+        {
+          "name": "POST _create — invalid JSON (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{not-json" },
+            "url": "{{baseUrl}}/v1/land/_create",
+            "description": "Error case: malformed body."
+          },
+          "response": [
+            {
+              "name": "400 — BAD_REQUEST / parse error",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": null,\n  \"Errors\": [\n    {\n      \"code\": \"BAD_REQUEST\",\n      \"message\": \"invalid character ...\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST _create — missing LandInfo (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"err-no-land\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\" }\n  }\n}"
+            },
+            "url": "{{baseUrl}}/v1/land/_create",
+            "description": "Error case: LandInfo omitted."
+          },
+          "response": [
+            {
+              "name": "400 — land info required",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": { \"msgId\": \"err-no-land\", \"status\": \"failed\" },\n  \"Errors\": [\n    { \"code\": \"INVALID TENANT\", \"message\": \"land info is required\" }\n  ]\n}"
+            }
           ]
         }
-      }
+      ]
+    },
+    {
+      "name": "v1/land/_update",
+      "item": [
+        {
+          "name": "POST _update — success",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"update-1\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"{{tenantId}}\"\n    }\n  },\n  \"LandInfo\": {\n    \"id\": \"{{landId}}\",\n    \"tenantId\": \"{{tenantId}}\",\n    \"ownershipCategory\": \"INDIVIDUAL\",\n    \"address\": {\n      \"doorNo\": \"12A\",\n      \"city\": \"Amritsar\",\n      \"locality\": { \"code\": \"SUN01\" }\n    },\n    \"owners\": [\n      {\n        \"name\": \"Test Owner\",\n        \"mobileNumber\": \"9999999999\",\n        \"isPrimaryOwner\": true,\n        \"active\": true\n      }\n    ]\n  }\n}"
+            },
+            "url": "{{baseUrl}}/v1/land/_update",
+            "description": "Set `landId` to an existing record. Publishes to `update-landinfo`."
+          },
+          "response": [
+            {
+              "name": "200 — successful (schema)",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": {\n    \"msgId\": \"update-1\",\n    \"status\": \"successful\"\n  },\n  \"LandInfo\": [\n    {\n      \"id\": \"{{landId}}\",\n      \"tenantId\": \"pb.amritsar\",\n      \"status\": \"ACTIVE\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST _update — missing id (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": { \"msgId\": \"err-update-id\", \"authToken\": \"{{authToken}}\" },\n  \"LandInfo\": { \"tenantId\": \"{{tenantId}}\" }\n}"
+            },
+            "url": "{{baseUrl}}/v1/land/_update",
+            "description": "Error case: LandInfo.id required for update."
+          },
+          "response": [
+            {
+              "name": "400 — UPDATE ERROR",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": { \"msgId\": \"err-update-id\", \"status\": \"failed\" },\n  \"Errors\": [\n    { \"code\": \"UPDATE ERROR\", \"message\": \"Id is mandatory to update \" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST _update — invalid JSON (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{broken" },
+            "url": "{{baseUrl}}/v1/land/_update",
+            "description": "Error case: malformed body."
+          },
+          "response": [
+            {
+              "name": "400 — BAD_REQUEST",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"Errors\": [{ \"code\": \"BAD_REQUEST\", \"message\": \"...\" }]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "v1/land/_search",
+      "item": [
+        {
+          "name": "POST _search — by tenantId (success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": {\n    \"apiId\": \"Rainmaker\",\n    \"ver\": \".01\",\n    \"ts\": 1700000000000,\n    \"msgId\": \"search-1\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": {\n      \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"type\": \"EMPLOYEE\",\n      \"tenantId\": \"{{tenantId}}\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/land/_search?tenantId={{tenantId}}&limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "land", "_search"],
+              "query": [
+                { "key": "tenantId", "value": "{{tenantId}}" },
+                { "key": "limit", "value": "10" },
+                { "key": "offset", "value": "0" }
+              ]
+            },
+            "description": "Reads Postgres. Query params + RequestInfo body (Java parity)."
+          },
+          "response": [
+            {
+              "name": "200 — successful with results",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": {\n    \"msgId\": \"search-1\",\n    \"status\": \"successful\"\n  },\n  \"LandInfo\": [\n    {\n      \"id\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n      \"tenantId\": \"pb.amritsar\",\n      \"status\": \"ACTIVE\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "200 — successful empty array",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": {\n    \"msgId\": \"search-1\",\n    \"status\": \"successful\"\n  },\n  \"LandInfo\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST _search — employee no params (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-err-employee\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\", \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\" }\n  }\n}"
+            },
+            "url": "{{baseUrl}}/v1/land/_search",
+            "description": "Error case: employee search without query params."
+          },
+          "response": [
+            {
+              "name": "400 — INVALID SEARCH",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": { \"msgId\": \"search-err-employee\", \"status\": \"failed\" },\n  \"Errors\": [\n    {\n      \"code\": \"INVALID SEARCH\",\n      \"message\": \"Search without any paramters is not allowed\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST _search — citizen missing tenantId (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-err-citizen\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": { \"type\": \"CITIZEN\", \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\" }\n  }\n}"
+            },
+            "url": "{{baseUrl}}/v1/land/_search?mobileNumber=9999999999",
+            "description": "Error case: citizen must pass tenantId in query."
+          },
+          "response": [
+            {
+              "name": "400 — TenantId mandatory",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": { \"msgId\": \"search-err-citizen\", \"status\": \"failed\" },\n  \"Errors\": [\n    {\n      \"code\": \"INVALID SEARCH\",\n      \"message\": \"TenantId is mandatory in search\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST _search — by mobileNumber",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RequestInfo\": {\n    \"msgId\": \"search-mobile\",\n    \"authToken\": \"{{authToken}}\",\n    \"userInfo\": { \"type\": \"EMPLOYEE\", \"uuid\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\" }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/land/_search?tenantId={{tenantId}}&mobileNumber=9999999999",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "land", "_search"],
+              "query": [
+                { "key": "tenantId", "value": "{{tenantId}}" },
+                { "key": "mobileNumber", "value": "9999999999" }
+              ]
+            },
+            "description": "Resolves user via egov-user then searches by owner uuid."
+          },
+          "response": [
+            {
+              "name": "200 — empty or matching lands",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ResponseInfo\": { \"msgId\": \"search-mobile\", \"status\": \"successful\" },\n  \"LandInfo\": []\n}"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

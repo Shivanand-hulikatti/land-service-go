@@ -222,6 +222,10 @@ make test-integration
 
 Collection: `docs/postman/land-services.postman_collection.json`
 
+- Folders: Health, `_create`, `_update`, `_search`
+- Each request includes **headers**, **sample body**, and **saved response examples** (200 success + 400 error schemas)
+- Collection variables: `baseUrl`, `authToken`, `tenantId`, `landId`
+
 ```bash
 make newman
 # or

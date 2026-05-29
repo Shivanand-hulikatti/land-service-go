@@ -88,7 +88,6 @@ Create every folder exactly as specified. No deviations.
 - [x] `github.com/gin-gonic/gin` — HTTP router
 - [x] `github.com/IBM/sarama` — Kafka producer/consumer
 - [x] `github.com/spf13/viper` — config management
-- [ ] `github.com/go-playground/validator/v10` — request validation — **using custom `internal/validator` instead**
 - [x] `github.com/sirupsen/logrus` — structured logging
 - [x] DB driver — `gorm.io/gorm` + `gorm.io/driver/postgres` (search via GORM `Raw` + row mapper)
 - [x] Run `go mod tidy` — verify `go.sum` is generated
@@ -306,7 +305,7 @@ Status: ⬜ Pending · 🔄 In Progress · ✅ Tested
 - [x] Construct handler: `h := handler.New<Entity>Handler(svc)` — via router
 - [x] Register all Gin routes
 - [x] Start Gin server on configured port
-- [ ] Graceful shutdown handling (catch OS signals, close DB and Kafka connections) — **only `defer deps.Close()`; no SIGTERM handler**
+- [x] Graceful shutdown handling (catch OS signals, close DB and Kafka connections) — `SIGINT`/`SIGTERM` → `http.Server.Shutdown` → `deps.Close()` (DB + Kafka)
 
 ### Commit
 - [x] Commit: `[<prefix>] chore: wired all dependencies in main.go and started server`
@@ -374,13 +373,13 @@ See also `docs/EDGE-CASE-MATRIX.md` for full matrix.
 - [x] Edge case test results documented — `docs/EDGE-CASE-MATRIX.md`
 - [ ] Exported as PDF at handover
 
-### Postman Collection (`docs/postman.json`)
-- [x] Every endpoint has a request entry — `docs/postman/land-services.postman_collection.json`
-- [x] Each request includes full sample payload with `RequestInfo` object — uses golden JSON refs
-- [ ] Each request includes expected response schema
-- [ ] Each request includes required headers
-- [ ] At least one error case per endpoint
-- [x] Collection exported and committed to `docs/postman.json` — **path:** `docs/postman/land-services.postman_collection.json`
+### Postman Collection (`docs/postman/land-services.postman_collection.json`)
+- [x] Every endpoint has a request entry — Health, `_create`, `_update`, `_search` (+ variants)
+- [x] Each request includes full sample payload with `RequestInfo` object — golden-aligned bodies + `authToken` variable
+- [x] Each request includes expected response schema — saved examples per request (`200` success + `400`/`503` error shapes)
+- [x] Each request includes required headers — `Content-Type` + `Accept: application/json` on POST; `Accept` on GET health (documented in collection description)
+- [x] At least one error case per endpoint — create (3), update (2), search (2), health (503 degraded example)
+- [x] Collection exported and committed — `docs/postman/land-services.postman_collection.json`
 - [x] Collection linked in `README.md`
 
 ### `README.md`
