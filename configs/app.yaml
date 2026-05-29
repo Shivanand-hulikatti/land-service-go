@@ -1,0 +1,56 @@
+server:
+  port: "8199"
+  contextPath: /land-services
+
+database:
+  host: localhost
+  port: 5432
+  name: land_services
+  user: postgres
+  password: ""
+  sslMode: disable
+
+kafka:
+  bootstrapServers:
+    - localhost:9092
+  saveLandInfoTopic: save-landinfo
+  updateLandInfoTopic: update-landinfo
+  producer:
+    retries: 5
+    requiredAcks: all
+
+httpClient:
+  timeoutSeconds: 30
+
+egov:
+  user:
+    host: http://localhost:8081
+    contextPath: /user/users
+    createPath: /_createnovalidate
+    searchPath: /user/_search
+    updatePath: /_updatenovalidate
+    usernamePrefix: BPA-
+  location:
+    host: http://localhost:8085
+    contextPath: /egov-location/location/v11
+    endpoint: /boundarys/_search
+    hierarchyTypeCode: REVENUE
+  mdms:
+    host: https://dev.digit.org
+    searchEndpoint: /egov-mdms-service/v1/_search
+  localization:
+    host: https://dev.digit.org
+    workDirPath: /localization/messages/v1
+    contextPath: /localization/messages/v1
+    searchEndpoint: /_search
+    stateLevel: true
+  pagination:
+    defaultOffset: 0
+    defaultLimit: 10
+    maxLimit: 50
+  ownershipCategory:
+    institutional: INSTITUTIONAL
+
+search:
+  citizenAllowedParams: ids,edcrNumber,status,applicationNo,approvalNo,mobileNumber,offset,limit
+  employeeAllowedParams: ids,edcrNumber,status,applicationNo,approvalNo,mobileNumber,offset,limit
